@@ -12,23 +12,28 @@ script = ExtResource( 3 )
 [node name="StableHordeClient" type="HTTPRequest" parent="."]
 unique_name_in_owner = true
 script = ExtResource( 2 )
-amount = 5
-steps = 25
+
+[node name="LineEdit" type="LineEdit" parent="."]
+unique_name_in_owner = true
+margin_right = 1024.0
+margin_bottom = 24.0
+placeholder_text = "A horde of cute blue robots with gears on their head."
 
 [node name="Button" type="Button" parent="."]
 unique_name_in_owner = true
+margin_top = 28.0
 margin_right = 1024.0
-margin_bottom = 20.0
+margin_bottom = 48.0
 text = "Generate"
 
 [node name="Grid" type="GridContainer" parent="."]
 unique_name_in_owner = true
-margin_top = 24.0
+margin_top = 52.0
 margin_right = 1024.0
 margin_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-columns = 5
+columns = 7
 
 [node name="TextureRect" type="TextureRect" parent="Grid"]
 margin_right = 128.0

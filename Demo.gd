@@ -2,6 +2,7 @@ extends VBoxContainer
 
 onready var stable_horde_client = $"%StableHordeClient"
 onready var grid = $"%Grid"
+onready var line_edit = $"%LineEdit"
 
 
 
@@ -9,7 +10,7 @@ func _ready():
 	stable_horde_client.connect("images_generated",self, "_on_images_generated")
 
 func _on_Button_pressed():
-	stable_horde_client.generate()
+	stable_horde_client.generate(line_edit.text)
 
 func _on_images_generated(textures_list):
 	for texture in textures_list:
