@@ -9,6 +9,7 @@ export(int) var amount := 1
 export(int,64,1024,64) var width := 512
 export(int,64,1024,64) var length := 512
 export(int,1,200) var steps := 50
+export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "DDIM", "PLMS") var sampler_name := "k_lms"
 
 var all_image_textures := []
 var latest_image_textures := []
@@ -24,6 +25,7 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"width": width,
 		"height": length,
 		"steps": steps,
+		"sampler_name": sampler_name,
 		# You can put extra SD webui params here if you wish
 	}
 	for param in replacement_params:
