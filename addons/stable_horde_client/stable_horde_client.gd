@@ -14,6 +14,7 @@ var all_image_textures := []
 var latest_image_textures := []
 
 func _ready():
+	# warning-ignore:return_value_discarded
 	connect("request_completed",self,"_on_request_completed")
 
 func generate(replacement_prompt := '', replacement_params := {}) -> void:
@@ -41,7 +42,7 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		push_error("Something went wrong when submitting the stable horde request")
 
 # warning-ignore:unused_argument
-func _on_request_completed(result, response_code, headers, body):
+func _on_request_completed(_result, _response_code, _headers, body):
 	var json_ret = parse_json(body.get_string_from_utf8())
 	for img_dict in json_ret:
 		var b64img = img_dict["img"]
