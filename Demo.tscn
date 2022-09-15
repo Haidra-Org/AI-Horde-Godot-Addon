@@ -12,7 +12,8 @@ script = ExtResource( 3 )
 [node name="StableHordeClient" type="HTTPRequest" parent="."]
 unique_name_in_owner = true
 script = ExtResource( 2 )
-steps = 10
+amount = 5
+steps = 25
 
 [node name="Button" type="Button" parent="."]
 unique_name_in_owner = true
