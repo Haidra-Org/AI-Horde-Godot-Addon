@@ -8,10 +8,20 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "HTTPRequest",
+"class": "StableHordeClient",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_client.gd"
+} ]
+_global_script_class_icons={
+"StableHordeClient": ""
+}
+
 [application]
 
 config/name="Stable-horde-client"
-run/main_scene="res://Control.tscn"
+run/main_scene="res://Demo.tscn"
 config/icon="res://icon.png"
 
 [editor_plugins]

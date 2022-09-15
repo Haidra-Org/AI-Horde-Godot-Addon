@@ -1,4 +1,7 @@
+class_name StableHordeClient
 extends HTTPRequest
+
+signal images_generated(texture_list)
 
 export(String) var prompt = "A horde of cute blue robots with gears on their head"
 export(String) var api_key := '0000000000'
@@ -7,10 +10,14 @@ export(int,64,1024,64) var width := 512
 export(int,64,1024,64) var length := 512
 export(int,1,200) var steps := 50
 
-var image_textures := []
+var all_image_textures := []
+var latest_image_textures := []
 
 func _ready():
 	connect("request_completed",self,"_on_request_completed")
+
+func generate(replacement_prompt := '', replacement_params := {}) -> void:
+	latest_image_textures.clear()
 	var imgen_params = {
 		"n": amount,
 		"width": width,
@@ -18,13 +25,16 @@ func _ready():
 		"steps": steps,
 		# You can put extra SD webui params here if you wish
 	}
+	for param in replacement_params:
+		imgen_params[param] = replacement_params[param]
 	var submit_dict = {
 		"prompt": prompt,
 		"api_key": api_key,
 		"params": imgen_params
 	}
+	if replacement_prompt != '':
+		submit_dict['prompt'] = replacement_prompt
 	var body = to_json(submit_dict)
-	print_debug(body)
 	var headers = ["Content-Type: application/json"]
 	var error = request("https://stablehorde.net/api/v1/generate/sync", headers, false, HTTPClient.METHOD_POST, body)
 	if error != OK:
@@ -32,10 +42,6 @@ func _ready():
 
 # warning-ignore:unused_argument
 func _on_request_completed(result, response_code, headers, body):
-# warning-ignore:unused_variable
-	print_debug(response_code)
-	print_debug(headers)
-	print_debug(body.size())
 	var json_ret = parse_json(body.get_string_from_utf8())
 	for img_dict in json_ret:
 		var b64img = img_dict["img"]
@@ -46,4 +52,6 @@ func _on_request_completed(result, response_code, headers, body):
 			push_error("Couldn't load the image.")
 		var texture = ImageTexture.new()
 		texture.create_from_image(image)
-		image_textures.append(texture)
+		latest_image_textures.append(texture)
+		all_image_textures.append(texture)
+	emit_signal("images_generated",latest_image_textures)
