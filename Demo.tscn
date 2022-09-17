@@ -9,26 +9,36 @@ margin_right = 1024.0
 margin_bottom = 600.0
 script = ExtResource( 3 )
 
-[node name="StableHordeClient" type="HTTPRequest" parent="."]
-unique_name_in_owner = true
-script = ExtResource( 2 )
+[node name="RichTextLabel" type="RichTextLabel" parent="."]
+margin_right = 1024.0
+margin_bottom = 15.0
+bbcode_enabled = true
+bbcode_text = "Check out my [color=yellow][url=stable horde client]fully fledged client[/url][/color]."
+text = "Check out my fully fledged client."
+fit_content_height = true
 
 [node name="LineEdit" type="LineEdit" parent="."]
 unique_name_in_owner = true
+margin_top = 19.0
 margin_right = 1024.0
-margin_bottom = 24.0
+margin_bottom = 43.0
 placeholder_text = "A horde of cute blue robots with gears on their head."
 
 [node name="Button" type="Button" parent="."]
 unique_name_in_owner = true
-margin_top = 28.0
+margin_top = 47.0
 margin_right = 1024.0
-margin_bottom = 48.0
+margin_bottom = 67.0
 text = "Generate"
+
+[node name="StableHordeClient" type="HTTPRequest" parent="."]
+unique_name_in_owner = true
+script = ExtResource( 2 )
+steps = 20
 
 [node name="Grid" type="GridContainer" parent="."]
 unique_name_in_owner = true
-margin_top = 52.0
+margin_top = 71.0
 margin_right = 1024.0
 margin_bottom = 600.0
 size_flags_horizontal = 3
@@ -43,4 +53,5 @@ texture = ExtResource( 1 )
 expand = true
 stretch_mode = 6
 
+[connection signal="meta_clicked" from="RichTextLabel" to="." method="_on_RichTextLabel_meta_clicked"]
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
