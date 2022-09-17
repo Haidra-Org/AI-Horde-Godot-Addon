@@ -16,8 +16,12 @@ You can also send an ad-hoc bypass prompt or parameters to the generate function
 
 # Demo
 
-Run this project using the Demo scene. Press the button to keep generating new images into the grid
+Run this project using the Demo scene. Press the button to keep generating new images into the grid.
+
+You can also try out my [Stable Horde Client](https://github.com/db0/Stable-Horde-Client) which is using this addon.
 
 # To Do
 
-Add the rest of the options for the generations
+- Support for ESRGAN, GFPGAN
+- Support for prompt vectors
+- progress reports
