@@ -30,7 +30,7 @@ export(int,64,1024,64) var width := 512
 export(int,64,1024,64) var height := 512
 # The steps correspond directly to the time it takes to get back your image.
 # Generally there's usually no reason to go above 50 unless you know what you're doing.
-export(int,1,200) var steps := 50
+export(int,1,100) var steps := 50
 # Advanced: The sampler used to generate. Provides slight variations on the same prompt.
 export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "DDIM", "PLMS") var sampler_name := "k_lms"
 # How closely to follow the prompt given
