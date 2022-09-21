@@ -44,8 +44,7 @@ func get_filename() -> String:
 		"prompt": prompt,
 		"gen_seed": gen_seed
 	}
-	var filename : String = _prepare_filename(FILENAME_TEMPLATE.format(fmt))
-	return(filename)
+	return(FILENAME_TEMPLATE.format(fmt))
 
 func get_dirname() -> String:
 	var fmt := {
@@ -53,8 +52,7 @@ func get_dirname() -> String:
 		"sampler_name": sampler_name,
 		"steps": steps,
 	}
-	var dirname : String = _prepare_filename(DIRECTORY_TEMPLATE.format(fmt))
-	return(dirname)
+	return(DIRECTORY_TEMPLATE.format(fmt))
 
 func save_in_dir(save_dir_path: String) -> void:
 	var dir = Directory.new()
@@ -73,10 +71,4 @@ func save_in_dir(save_dir_path: String) -> void:
 	var filename = "{save_dir_path}/{relative_dir}/{filename}.png".format(fmt)
 	dir.make_dir(get_dirname())
 	error = image.save_png(filename)
-
-func _prepare_filename(filename: String) -> String:
-	for character in [':','/','\\','?','*','"','|','%','<','>',',',' ']:
-		filename = filename.replace(character,'_')
-	if not filename.is_valid_filename():
-		push_error("Count not remove special characters from string: " + filename)
-	return(filename)
+	
