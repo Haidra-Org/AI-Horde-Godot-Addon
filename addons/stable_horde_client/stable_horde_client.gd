@@ -1,9 +1,7 @@
 class_name StableHordeClient
-extends HTTPRequest
+extends StableHordeHTTPRequest
 
 signal images_generated(completed_payload)
-signal request_failed(error_msg)
-signal request_warning(warning_msg)
 signal image_processing(stats)
 
 enum SamplerMethods {
@@ -23,12 +21,6 @@ enum OngoingRequestOperations {
 	CANCEL
 }
 
-enum States {
-	READY
-	WORKING
-	CANCELLING
-}
-
 export(String) var prompt = "A horde of cute blue robots with gears on their head"
 # The API key you've generated from https://stablehorde.net/register
 # You can pass either your own key (make sure you encrypt your app)
@@ -44,11 +36,13 @@ export(int,64,1024,64) var width := 512
 export(int,64,1024,64) var height := 512
 # The steps correspond directly to the time it takes to get back your image.
 # Generally there's usually no reason to go above 50 unless you know what you're doing.
-export(int,1,200) var steps := 50
+export(int,1,100) var steps := 30
 # Advanced: The sampler used to generate. Provides slight variations on the same prompt.
-export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "DDIM", "PLMS") var sampler_name := "k_lms"
+export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "DDIM", "PLMS") var sampler_name := "k_euler"
 # How closely to follow the prompt given
 export(float,-40,30,0.5) var cfg_scale := 7.5
+# How closely to follow the source image in img2img
+export(float,0,1,0.01) var denoising_strength := 0.7
 # The unique seed for the prompt. If you pass a value in the seed and keep all the values the same
 # The same image will always be generated.
 export(String) var gen_seed := ''
@@ -60,7 +54,13 @@ export(bool) var nsfw := false
 # If set to false, and a sfw request accidently generates nsfw content, the worker
 # will automatically set it to a black image.
 export(bool) var censor_nsfw := true
-
+# When true, will allow untrusted workers to also generate for this request.
+export(bool) var trusted_workers := true
+# The model to be used to generate this request. If you change this, use the StableHordeModels class 
+# To ensure there is a worker serving that model first.
+# An empty array here picks the first available models from the workers
+export(Array) var models := ["stable_diffusion"]
+export(Image) var source_image
 
 var all_image_textures := []
 var latest_image_textures := []
@@ -70,12 +70,7 @@ var async_request_id : String
 # They are replaced every time a new generation begins
 var imgen_params : Dictionary
 # When set to true, we will abort the current generation and try to retrieve whatever images we can
-var state : int = States.READY
 var request_start_time : float # We use that to get the accurate amount of time the request took
-
-func _ready():
-	# warning-ignore:return_value_discarded
-	connect("request_completed",self,"_on_request_completed")
 
 func generate(replacement_prompt := '', replacement_params := {}) -> void:
 	if state != States.READY:
@@ -101,7 +96,12 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"params": imgen_params,
 		"nsfw": nsfw,
 		"censor_nsfw": censor_nsfw,
+		"trusted_workers": trusted_workers,
+		"models": models
 	}
+	if source_image:
+		submit_dict["source_image"] = get_img2img_b64(source_image)
+		submit_dict["params"]["denoising_strength"] = denoising_strength
 	if replacement_prompt != '':
 		submit_dict['prompt'] = replacement_prompt
 	var body = to_json(submit_dict)
@@ -111,32 +111,10 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		var error_msg := "Something went wrong when initiating the stable horde request"
 		push_error(error_msg)
 		emit_signal("request_failed",error_msg)
+	emit_signal("request_initiated")
 
-# warning-ignore:unused_argument
-func _on_request_completed(_result, response_code, _headers, body):
-	if response_code == 0:
-			var error_msg := "Stable Horde address cannot be resolved!"
-			push_error(error_msg)
-			emit_signal("request_failed",error_msg)
-			return
-	if response_code == 404:
-			var error_msg := "Bad URL. Please contact the developer of this addon"
-			push_error(error_msg)
-			emit_signal("request_failed",error_msg)
-			return
-	var json_ret = parse_json(body.get_string_from_utf8())
-	var json_error = json_ret
-	if typeof(json_ret) == TYPE_DICTIONARY and json_ret.has('message'):
-		json_error = str(json_ret['message'])
-	if typeof(json_ret) == TYPE_NIL:
-		json_error = 'Connection Lost'
-	if not response_code in [200, 202] or typeof(json_ret) == TYPE_STRING:
-			var error_msg : String = "Error received from the Stable Horde: " +  json_error
-			push_error(error_msg)
-			emit_signal("request_failed",error_msg)
-			return
-	if json_ret.has('message'):
-		emit_signal("request_warning", json_ret['message'])
+# Function to overwrite to process valid return from the horde
+func process_request(json_ret) -> void:
 	if typeof(json_ret) == TYPE_ARRAY:
 		_extract_images(json_ret)
 		return
@@ -194,6 +172,7 @@ func _extract_images(generations_array: Array) -> void:
 			prompt,
 			imgen_params,
 			img_dict["seed"],
+			img_dict["model"],
 			img_dict["worker_id"],
 			img_dict["worker_name"],
 			image)
@@ -212,11 +191,11 @@ func _extract_images(generations_array: Array) -> void:
 func get_sampler_method_id() -> String:
 	return(SamplerMethods[sampler_name])
 
-
-func is_ready() -> bool:
-	return(get_http_client_status() == HTTPClient.STATUS_DISCONNECTED)
-
-
 func cancel_request() -> void:
 	print_debug("Cancelling...")
 	state = States.CANCELLING
+
+func get_img2img_b64(image: Image) -> String:
+	var imgbuffer = image.save_png_to_buffer()
+	return(Marshalls.raw_to_base64(imgbuffer))
+	

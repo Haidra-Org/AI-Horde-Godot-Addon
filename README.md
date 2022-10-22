@@ -23,5 +23,3 @@ You can also try out my [Stable Horde Client](https://github.com/db0/Stable-Hord
 # To Do
 
 - Support for ESRGAN, GFPGAN
-- Support for prompt vectors
-- progress reports

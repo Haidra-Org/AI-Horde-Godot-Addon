@@ -34,7 +34,15 @@ text = "Generate"
 [node name="StableHordeClient" type="HTTPRequest" parent="."]
 unique_name_in_owner = true
 script = ExtResource( 2 )
+prompt = null
+api_key = null
+amount = null
+width = null
+height = null
 steps = 20
+sampler_name = null
+cfg_scale = null
+gen_seed = null
 
 [node name="Grid" type="GridContainer" parent="."]
 unique_name_in_owner = true
