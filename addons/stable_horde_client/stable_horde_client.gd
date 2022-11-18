@@ -11,8 +11,10 @@ enum SamplerMethods {
 	k_euler_a
 	k_dpm_2
 	k_dpm_2_a
-	DDIM
-	PLMS
+	k_dpm_fast
+	k_dpm_adaptive
+	k_dpmpp_2s_a
+	k_dpmpp_2m
 }
 
 enum OngoingRequestOperations {
@@ -46,6 +48,8 @@ export(float,0,1,0.01) var denoising_strength := 0.7
 # The unique seed for the prompt. If you pass a value in the seed and keep all the values the same
 # The same image will always be generated.
 export(String) var gen_seed := ''
+# Advanced: The sampler used to generate. Provides slight variations on the same prompt.
+export(Array) var post_processing := []
 # If set to True, will enable the karras noise scheduler
 export(bool) var karras := true
 # If set to True, will mark this generation as NSFW and only workers which accept NSFW requests
@@ -90,7 +94,7 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"karras": karras,
 		"cfg_scale": cfg_scale,
 		"seed": gen_seed,
-		# You can put extra SD webui params here if you wish
+		"post_processing": post_processing,
 	}
 	for param in replacement_params:
 		imgen_params[param] = replacement_params[param]
@@ -161,6 +165,7 @@ func check_request_process(operation := OngoingRequestOperations.CHECK) -> void:
 
 
 func _extract_images(generations_array: Array) -> void:
+	var timestamp = OS.get_unix_time()
 	for img_dict in generations_array:
 		var b64img = img_dict["img"]
 		var base64_bytes = Marshalls.base64_to_raw(b64img)
@@ -178,6 +183,7 @@ func _extract_images(generations_array: Array) -> void:
 			img_dict["model"],
 			img_dict["worker_id"],
 			img_dict["worker_name"],
+			timestamp,
 			image)
 		texture.create_from_image(image)
 		latest_image_textures.append(texture)
