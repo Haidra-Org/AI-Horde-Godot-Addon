@@ -18,8 +18,4 @@ You can also send an ad-hoc bypass prompt or parameters to the generate function
 
 Run this project using the Demo scene. Press the button to keep generating new images into the grid.
 
-You can also try out my [Stable Horde Client](https://github.com/db0/Stable-Horde-Client) which is using this addon.
-
-# To Do
-
-- Support for ESRGAN, GFPGAN
+You can also try out [Lucid Creations](https://github.com/db0/Lucid-Creations) which is my fully-fledged client using this addon.
