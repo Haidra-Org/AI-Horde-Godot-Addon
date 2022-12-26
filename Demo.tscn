@@ -31,22 +31,22 @@ margin_right = 1024.0
 margin_bottom = 67.0
 text = "Generate"
 
+[node name="Status" type="Label" parent="."]
+unique_name_in_owner = true
+margin_top = 71.0
+margin_right = 1024.0
+margin_bottom = 85.0
+text = "Status"
+align = 1
+
 [node name="StableHordeClient" type="HTTPRequest" parent="."]
 unique_name_in_owner = true
 script = ExtResource( 2 )
-prompt = null
-api_key = null
-amount = null
-width = null
-height = null
 steps = 20
-sampler_name = null
-cfg_scale = null
-gen_seed = null
 
 [node name="Grid" type="GridContainer" parent="."]
 unique_name_in_owner = true
-margin_top = 71.0
+margin_top = 89.0
 margin_right = 1024.0
 margin_bottom = 600.0
 size_flags_horizontal = 3

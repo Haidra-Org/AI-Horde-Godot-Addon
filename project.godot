@@ -15,13 +15,49 @@ _global_script_classes=[ {
 "path": "res://addons/stable_horde_client/AIImageTexture.gd"
 }, {
 "base": "HTTPRequest",
+"class": "R2ImageRetriever",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/r2_image_retriever.gd"
+}, {
+"base": "StableHordeHTTPRequest",
 "class": "StableHordeClient",
 "language": "GDScript",
 "path": "res://addons/stable_horde_client/stable_horde_client.gd"
+}, {
+"base": "HTTPRequest",
+"class": "StableHordeHTTPRequest",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_httpclient.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "StableHordeLogin",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_login.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "StableHordeModelReference",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_model_reference.gd"
+}, {
+"base": "HTTPRequest",
+"class": "StableHordeModelShowcase",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_model_showcase.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "StableHordeModels",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_models.gd"
 } ]
 _global_script_class_icons={
 "AIImageTexture": "",
-"StableHordeClient": ""
+"R2ImageRetriever": "",
+"StableHordeClient": "",
+"StableHordeHTTPRequest": "",
+"StableHordeLogin": "",
+"StableHordeModelReference": "",
+"StableHordeModelShowcase": "",
+"StableHordeModels": ""
 }
 
 [application]

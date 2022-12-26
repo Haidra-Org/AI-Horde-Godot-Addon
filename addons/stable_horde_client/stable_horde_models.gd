@@ -10,12 +10,13 @@ var model_reference: StableHordeModelReference
 
 func _ready() -> void:
 	model_reference = StableHordeModelReference.new()
+	timeout = 2
 	add_child(model_reference)
 	
 
 func get_models() -> void:
 	if state != States.READY:
-		push_warning("Models currently working. Cannot do more than 1 request at a time with the same Stable Horde Models.")
+		print_debug("Models currently working. Cannot do more than 1 request at a time with the same Stable Horde Models.")
 		return
 	state = States.WORKING
 	var error = request("https://stablehorde.net/api/v2/status/models", [], false, HTTPClient.METHOD_GET)
@@ -39,5 +40,3 @@ func process_request(json_ret) -> void:
 		model_names.append(entry.name)
 	emit_signal("models_retrieved", model_performances, model_reference.model_reference)
 	state = States.READY
-
-
