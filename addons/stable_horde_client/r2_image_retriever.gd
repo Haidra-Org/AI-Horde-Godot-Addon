@@ -7,7 +7,7 @@ signal retrieval_success(image_bytes)
 
 func _ready():
 	# warning-ignore:return_value_discarded
-	connect("request_completed",self,"_on_request_completed")
+	connect("request_completed",Callable(self,"_on_request_completed"))
 
 
 func download_image(r2_url: String) -> void:
@@ -18,7 +18,7 @@ func download_image(r2_url: String) -> void:
 		if http_error == OK:
 			break
 		retries += 1
-		yield(get_tree().create_timer(1), "timeout")
+		await get_tree().create_timer(1).timeout
 		if retries > 3:
 			var error_msg := "Error occured during image retrieval request"
 			push_error(error_msg)

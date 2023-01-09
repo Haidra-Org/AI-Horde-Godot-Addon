@@ -9,7 +9,7 @@ func submit_rating(request_id: String, ratings_payload: Dictionary) -> void:
 		print_debug("Rating is already being processed")
 		return
 	state = States.WORKING
-	var body = to_json(ratings_payload)
+	var body = JSON.new().stringify(ratings_payload)
 	var url = "https://stablehorde.net/api/v2/generate/rate/" + request_id
 	var headers = ["Content-Type: application/json"]
 	print_debug(url)

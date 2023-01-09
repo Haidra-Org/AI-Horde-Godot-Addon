@@ -41,7 +41,7 @@ func _init(
 		_timestamp: float,
 		_image: Image,
 		_image_horde_id: String) -> void:
-	._init()
+	super._init()
 	prompt = _prompt
 	attributes = _imgen_params.duplicate(true)
 	attributes.erase('n')
@@ -65,7 +65,7 @@ func set_source_image_path(image_path: String) -> void:
 	source_image_path = image_path
 	attributes['source_image_path'] = image_path
 
-func get_filename() -> String:
+func get_scene_file_path() -> String:
 	var fmt := {
 		"timestamp": timestamp,
 		"gen_seed": gen_seed,
@@ -94,18 +94,19 @@ func get_full_filename_path(save_dir_path: String, extension = "png") -> String:
 	var fmt = {
 		"save_dir_path": save_dir_path,
 		"relative_dir": get_dirname(),
-		"filename": get_filename(),
+		"filename": get_scene_file_path(),
 		"extension": extension,
 	}
 	var filename = "{save_dir_path}/{relative_dir}/{filename}.{extension}".format(fmt)
 	return(filename)
 
 func save_in_dir(save_dir_path: String) -> void:
-	var dir = Directory.new()
-	var error = dir.open(save_dir_path)
+	var dir = DirAccess.open(save_dir_path)
+	var error = dir.get_open_error()
 	if error != OK:
 		dir.make_dir(save_dir_path)
-	error = dir.open(save_dir_path)
+	dir.open(save_dir_path)
+	error = dir.get_open_error() 
 	if error != OK:
 		push_error("Could not create directory: " + save_dir_path)
 		return
@@ -115,11 +116,10 @@ func save_in_dir(save_dir_path: String) -> void:
 	save_attributes_to_file(get_full_filename_path(save_dir_path, "json"))
 
 # This assumes the parent directory has been created already
+# This assumes the parent directory has been created already
 func save_attributes_to_file(filepath:String) -> void:
-	var file = File.new()
-	file.open(filepath, File.WRITE)
-	file.store_string(JSON.print(attributes, '\t'))
-	file.close()
+	var file = FileAccess.open(filepath, FileAccess.WRITE)
+	file.store_string(JSON.stringify(attributes, '\t'))
 	
 static func sanitize_filename(filename: String) -> String:
 	var replace_chars = [
