@@ -15,7 +15,7 @@ func _ready() -> void:
 
 func get_model_reference() -> void:
 	if state != States.READY:
-		push_warning("Model RefCounted currently working. Cannot do more than 1 request at a time with the same Stable Horde Model RefCounted.")
+		push_warning("Model Reference currently working. Cannot do more than 1 request at a time with the same Stable Horde Model Reference.")
 		return
 	state = States.WORKING
 	var error = request(model_refence_url, [], false, HTTPClient.METHOD_GET)
