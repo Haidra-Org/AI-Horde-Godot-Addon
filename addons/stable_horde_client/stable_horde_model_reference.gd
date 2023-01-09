@@ -3,7 +3,7 @@ extends StableHordeHTTPRequest
 
 signal reference_retrieved(models_list)
 
-export(String) var model_refence_url := "https://raw.githubusercontent.com/db0/nataili-model-reference/main/db.json"
+@export var model_refence_url: String = "https://raw.githubusercontent.com/db0/nataili-model-reference/main/db.json"
 
 var model_reference := {}
 var models_retrieved = false
@@ -15,7 +15,7 @@ func _ready() -> void:
 
 func get_model_reference() -> void:
 	if state != States.READY:
-		push_warning("Model Reference currently working. Cannot do more than 1 request at a time with the same Stable Horde Model Reference.")
+		push_warning("Model Referece currently working. Cannot do more than 1 request at a time with the same Stable Horde Model Referece.")
 		return
 	state = States.WORKING
 	var error = request(model_refence_url, [], false, HTTPClient.METHOD_GET)

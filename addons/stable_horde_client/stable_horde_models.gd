@@ -5,7 +5,7 @@ signal models_retrieved(models_list, model_reference)
 
 var model_performances := []
 var model_names := []
-var models_retrieved = false
+var models_retrieved_bool = false
 var model_reference: StableHordeModelReference
 
 func _ready() -> void:
