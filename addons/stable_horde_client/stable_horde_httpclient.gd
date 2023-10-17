@@ -11,7 +11,10 @@ enum States {
 	CANCELLING
 }
 # When set to true, we will abort the current generation and try to retrieve whatever images we can
+export(String) var aihorde_url = "https://aihorde.net"
+export(String) var client_agent = "AI Horde Godot Addon:2.7.0:db0#1625"
 var state : int = States.READY
+var service_name :String = "AI Horde"
 
 func _ready():
 	# warning-ignore:return_value_discarded
@@ -20,7 +23,7 @@ func _ready():
 # warning-ignore:unused_argument
 func _on_request_completed(_result, response_code, _headers, body):
 	if response_code == 0:
-			var error_msg := "Stable Horde timed out"
+			var error_msg := service_name + " request timed out"
 			push_error(error_msg)
 			emit_signal("request_failed",error_msg)
 			state = States.READY
@@ -38,11 +41,10 @@ func _on_request_completed(_result, response_code, _headers, body):
 		if json_ret.has('errors'):
 			json_error += ': ' + str(json_ret['errors'])
 	if typeof(json_ret) == TYPE_NIL:
-		print_debug(body)
 		print_debug(body.get_string_from_utf8())
 		json_error = 'Connection Lost'
 	if not response_code in [200, 202] or typeof(json_ret) == TYPE_STRING:
-			var error_msg : String = "Error received from the Stable Horde: " +  json_error
+			var error_msg : String = "Error received from the " + service_name + ": " +  str(json_error)
 			push_error(error_msg)
 			emit_signal("request_failed",error_msg)
 			state = States.READY

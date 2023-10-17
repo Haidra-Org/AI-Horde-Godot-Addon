@@ -14,6 +14,31 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/stable_horde_client/AIImageTexture.gd"
 }, {
+"base": "StableHordeHTTPRequest",
+"class": "CivitAILoraReference",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/civitai_lora_reference.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "CivitAIModelFetch",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/civitai_lora_model_fetch.gd"
+}, {
+"base": "HTTPRequest",
+"class": "CivitAIShowcase",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/civitai_showcase.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "CivitAITIReference",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/civitai_ti_reference.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "CivitAITextualInversionModelFetch",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/civitai_ti_model_fetch.gd"
+}, {
 "base": "HTTPRequest",
 "class": "R2ImageRetriever",
 "language": "GDScript",
@@ -48,16 +73,27 @@ _global_script_classes=[ {
 "class": "StableHordeModels",
 "language": "GDScript",
 "path": "res://addons/stable_horde_client/stable_horde_models.gd"
+}, {
+"base": "StableHordeHTTPRequest",
+"class": "StableHordeRateGeneration",
+"language": "GDScript",
+"path": "res://addons/stable_horde_client/stable_horde_rate_generation.gd"
 } ]
 _global_script_class_icons={
 "AIImageTexture": "",
+"CivitAILoraReference": "",
+"CivitAIModelFetch": "",
+"CivitAIShowcase": "",
+"CivitAITIReference": "",
+"CivitAITextualInversionModelFetch": "",
 "R2ImageRetriever": "",
 "StableHordeClient": "",
 "StableHordeHTTPRequest": "",
 "StableHordeLogin": "",
 "StableHordeModelReference": "",
 "StableHordeModelShowcase": "",
-"StableHordeModels": ""
+"StableHordeModels": "",
+"StableHordeRateGeneration": ""
 }
 
 [application]
