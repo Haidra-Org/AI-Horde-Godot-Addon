@@ -3,7 +3,6 @@ extends StableHordeHTTPRequest
 
 signal models_retrieved(models_list, model_reference)
 
-export(String) var aihorde_url: = "https://aihorde.net"
 var model_performances := []
 var model_names := []
 var models_retrieved = false

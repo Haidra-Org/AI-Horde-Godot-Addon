@@ -2,7 +2,6 @@ class_name StableHordeRateGeneration
 extends StableHordeHTTPRequest
 
 signal generation_rated(awarded_kudos)
-export(String) var aihorde_url = "https://aihorde.net"
 
 func submit_rating(request_id: String, ratings_payload: Dictionary) -> void:
 	if state != States.READY:
@@ -13,7 +12,7 @@ func submit_rating(request_id: String, ratings_payload: Dictionary) -> void:
 	var url = aihorde_url + "/api/v2/generate/rate/" + request_id
 	var headers = [
 		"Content-Type: application/json", 
-		"Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":(discord)db0#1625"
+		"Client-Agent: " + client_agent
 	]
 #	print_debug(url)
 #	print_debug(body)

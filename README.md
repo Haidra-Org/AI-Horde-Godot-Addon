@@ -14,6 +14,18 @@ When you call the generate function, it will use the exported variables you've p
 
 You can also send an ad-hoc bypass prompt or parameters to the generate function, which will override the exported variables. When the generation is complete, The StableHordeClient will convert the image data into textures and send them with its `images_generated` signal. You can afterwards also find them again in its `latest_image_textures` and `all_image_textures` arrays.
 
+# Nodes
+
+This addon provides the following nodes to use
+
+* StableHordeClient: Generate an Image using Stable Diffusion on the AI Horde
+* StableHordeModels: Retrieve and filter information about available model checkpoints on the AI Horde
+* CivitAILoraReference: Retrieve and filter information about Loras on CivitAI
+* CivitAITIReference: Retrieve and filter information about TIs on CivitAI
+* StableHordeRateGeneration: Submit ratings for images
+
+There's a few other helper nodes, but these are the primary ones you should use directly
+
 # Demo
 
 Run this project using the Demo scene. Press the button to keep generating new images into the grid.

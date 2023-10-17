@@ -38,7 +38,6 @@ enum OngoingRequestOperations {
 	CANCEL
 }
 
-export(String) var aihorde_url = "https://aihorde.net"
 export(String) var prompt = "A horde of cute blue robots with gears on their head"
 # The API key you've generated from https://aihorde.net/register
 # You can pass either your own key (make sure you encrypt your app)
@@ -164,7 +163,7 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 	var headers = [
 		"Content-Type: application/json", 
 		"apikey: " + api_key,
-		"Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":db0#1625",
+		"Client-Agent: " + client_agent,
 	]
 	var error = request(aihorde_url + "/api/v2/generate/async", headers, false, HTTPClient.METHOD_POST, body)
 	if error != OK:
@@ -217,7 +216,7 @@ func check_request_process(operation := OngoingRequestOperations.CHECK) -> void:
 		delete_sent = true
 	var error = request(
 		url, 
-		["Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":db0#1625"], 
+		["Client-Agent: " + client_agent], 
 		false, 
 		method)
 	if state == States.WORKING and error != OK:

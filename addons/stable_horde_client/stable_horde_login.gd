@@ -2,7 +2,6 @@ class_name StableHordeLogin
 extends StableHordeHTTPRequest
 
 signal login_successful(user_details)
-export(String) var aihorde_url = "https://aihorde.net"
 var user_details: Dictionary
 
 export(String) var api_key := '0000000000'
@@ -15,7 +14,7 @@ func login() -> void:
 	state = States.WORKING
 	var headers = [
 		"Content-Type: application/json", "apikey: " + api_key,
-		"Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":db0#1625"
+		"Client-Agent: " + client_agent
 	]
 	var error = request(aihorde_url + "/api/v2/find_user", headers, false, HTTPClient.METHOD_GET)
 	if error != OK:
