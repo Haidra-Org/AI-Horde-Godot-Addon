@@ -3,6 +3,7 @@ extends StableHordeHTTPRequest
 
 signal images_generated(completed_payload)
 signal image_processing(stats)
+signal kudos_calculated(kudos)
 
 enum SamplerMethods {
 	k_lms = 0
@@ -37,6 +38,7 @@ enum OngoingRequestOperations {
 	CANCEL
 }
 
+export(String) var aihorde_url = "https://aihorde.net"
 export(String) var prompt = "A horde of cute blue robots with gears on their head"
 # The API key you've generated from https://aihorde.net/register
 # You can pass either your own key (make sure you encrypt your app)
@@ -56,16 +58,24 @@ export(int,1,100) var steps := 30
 # Advanced: The sampler used to generate. Provides slight variations on the same prompt.
 export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "k_dpm_fast", "k_dpm_adaptive", "k_dpmpp_2s_a", "k_dpmpp_2m", "dpmsolver") var sampler_name := "k_euler_a"
 # How closely to follow the prompt given
-export(float,-40,30,0.5) var cfg_scale := 7.5
+export(float,0,30,0.5) var cfg_scale := 7.5
+# The number of CLIP language processor layers to skip.
+export(int,1,12,1) var clip_skip := 1
 # How closely to follow the source image in img2img
 export(float,0,1,0.01) var denoising_strength := 0.7
 # The unique seed for the prompt. If you pass a value in the seed and keep all the values the same
 # The same image will always be generated.
 export(String) var gen_seed := ''
-# Advanced: The sampler used to generate. Provides slight variations on the same prompt.
+# Post Processors to use.
 export(Array) var post_processing := []
+# Loras to use. Each entry needs to be a dictionary in the form of
+#{"name": String, "model": float, "clip": float}
+export(Array) var lora := []
+export(Array) var tis := []
 # If set to True, will enable the karras noise scheduler
 export(bool) var karras := true
+# If set to True, will activate the HiRes Fix
+export(bool) var hires_fix := false
 # If set to True, will mark this generation as NSFW and only workers which accept NSFW requests
 # Will fulfill it
 export(bool) var nsfw := false
@@ -87,6 +97,7 @@ export(bool) var r2 := true
 # top help train future models
 export(bool) var shared := true
 export(String, "none", "canny", "hed", "depth", "normal", "openpose", "seg", "scribble", "fakescribbles", "hough") var control_type := "none"
+export(bool) var dry_run := false
 
 var all_image_textures := []
 var latest_image_textures := []
@@ -116,12 +127,18 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"steps": steps,
 		"sampler_name": sampler_name,
 		"karras": karras,
+		"hires_fix": hires_fix,
 		"cfg_scale": cfg_scale,
 		"seed": gen_seed,
 		"post_processing": post_processing,
+		"clip_skip": clip_skip,
 	}
 	if control_type != 'none':
 		imgen_params["control_type"] = control_type
+	if lora.size() > 0:
+		imgen_params["loras"] = _get_loras_payload()
+	if tis.size() > 0:
+		imgen_params["tis"] = _get_tis_payload()
 	for param in replacement_params:
 		imgen_params[param] = replacement_params[param]
 	var submit_dict = {
@@ -133,33 +150,41 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"models": models,
 		"r2": r2,
 		"shared": shared,
+		"dry_run": dry_run,
+#		"workers": ["dc0704ab-5b42-4c65-8471-561be16ad696"], # debug
 	}
-	#print_debug(submit_dict)
+#	print_debug(submit_dict)
 	if source_image:
 		submit_dict["source_image"] = get_img2img_b64(source_image)
 		submit_dict["params"]["denoising_strength"] = denoising_strength
 	if replacement_prompt != '':
 		submit_dict['prompt'] = replacement_prompt
 	var body = to_json(submit_dict)
+#	print_debug(body)
 	var headers = [
 		"Content-Type: application/json", 
 		"apikey: " + api_key,
 		"Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":db0#1625",
 	]
-	var error = request("https://aihorde.net/api/v2/generate/async", headers, false, HTTPClient.METHOD_POST, body)
+	var error = request(aihorde_url + "/api/v2/generate/async", headers, false, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		var error_msg := "Something went wrong when initiating the stable horde request"
 		push_error(error_msg)
+		state = States.READY
 		emit_signal("request_failed",error_msg)
 	emit_signal("request_initiated")
 
 # Function to overwrite to process valid return from the horde
 func process_request(json_ret) -> void:
+#	print_debug(json_ret)
 	if typeof(json_ret) == TYPE_ARRAY:
 		_extract_images(json_ret)
 		return
 	if 'generations' in json_ret:
 		_extract_images(json_ret['generations'])
+		return
+	if 'kudos' in json_ret and dry_run:
+		complete_dry_run_request(json_ret["kudos"])
 		return
 	if delete_sent:
 		_return_empty()
@@ -182,16 +207,14 @@ func process_request(json_ret) -> void:
 func check_request_process(operation := OngoingRequestOperations.CHECK) -> void:
 	# We do one check request per second
 	yield(get_tree().create_timer(1), "timeout")
-	var url = "https://aihorde.net/api/v2/generate/check/" + async_request_id
+	var url = aihorde_url + "/api/v2/generate/check/" + async_request_id
 	var method = HTTPClient.METHOD_GET
 	if operation == OngoingRequestOperations.GET:
-		url = "https://aihorde.net/api/v2/generate/status/" + async_request_id
+		url = aihorde_url + "/api/v2/generate/status/" + async_request_id
 	elif operation == OngoingRequestOperations.CANCEL:
-		url = "https://aihorde.net/api/v2/generate/status/" + async_request_id
+		url = aihorde_url + "/api/v2/generate/status/" + async_request_id
 		method = HTTPClient.METHOD_DELETE
 		delete_sent = true
-	push_warning('Op:' + str(operation))
-	push_warning('State:' + str(state))
 	var error = request(
 		url, 
 		["Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":db0#1625"], 
@@ -209,6 +232,9 @@ func check_request_process(operation := OngoingRequestOperations.CHECK) -> void:
 
 func _extract_images(generations_array: Array) -> void:
 	var timestamp := OS.get_unix_time()
+	if generations_array.size() == 0:
+		complete_image_request()
+		return
 	for img_dict in generations_array:
 		var error
 		var image: Image
@@ -273,6 +299,15 @@ func complete_image_request() -> void:
 	emit_signal("images_generated",completed_payload)
 	state = States.READY
 
+func complete_dry_run_request(kudos: int) -> void:
+	var completed_payload = {
+		"kudos": kudos,
+		"elapsed_time": OS.get_ticks_msec() - request_start_time
+	}
+	request_start_time = 0
+	emit_signal("kudos_calculated",completed_payload)
+	state = States.READY
+
 func _on_r2_retrieval_success(image_bytes: PoolByteArray, img_dict: Dictionary, timestamp: int, expected_amount: int) -> void:
 	prepare_aitexture(image_bytes, img_dict, timestamp)
 	async_retrievals_completed += 1
@@ -299,3 +334,25 @@ func get_img2img_b64(image: Image) -> String:
 	var imgbuffer = image.save_png_to_buffer()
 	return(Marshalls.raw_to_base64(imgbuffer))
 	
+func _get_loras_payload() -> Array:
+	"""We replace the name with the ID, to ensure we find it easy on the worker"""
+	var loras_array = []
+	for item in lora:
+		var new_item = item.duplicate()
+		if new_item.has("id") and not new_item["name"].is_valid_integer():
+			new_item["original_name"] = str(new_item["name"])
+			new_item["name"] = str(new_item["id"])
+		loras_array.append(new_item)
+	return loras_array
+		
+func _get_tis_payload() -> Array:
+	"""We replace the name with the ID, to ensure we find it easy on the worker"""
+	var tis_array = []
+	for item in tis:
+		var new_item = item.duplicate()
+		if new_item.has("id") and not new_item["name"].is_valid_integer():
+			new_item["original_name"] = str(new_item["name"])
+			new_item["name"] = str(new_item["id"])
+		tis_array.append(new_item)
+	return tis_array
+		

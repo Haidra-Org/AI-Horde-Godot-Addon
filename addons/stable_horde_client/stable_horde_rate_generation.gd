@@ -2,7 +2,7 @@ class_name StableHordeRateGeneration
 extends StableHordeHTTPRequest
 
 signal generation_rated(awarded_kudos)
-
+export(String) var aihorde_url = "https://aihorde.net"
 
 func submit_rating(request_id: String, ratings_payload: Dictionary) -> void:
 	if state != States.READY:
@@ -10,14 +10,14 @@ func submit_rating(request_id: String, ratings_payload: Dictionary) -> void:
 		return
 	state = States.WORKING
 	var body = to_json(ratings_payload)
-	var url = "https://aihorde.net/api/v2/generate/rate/" + request_id
+	var url = aihorde_url + "/api/v2/generate/rate/" + request_id
 	var headers = [
 		"Content-Type: application/json", 
 		"Client-Agent: " + "Lucid Creations:" + ToolConsts.VERSION + ":(discord)db0#1625"
 	]
-	# print_debug(url)
-	# print_debug(body)
-	# print_debug(headers)
+#	print_debug(url)
+#	print_debug(body)
+#	print_debug(headers)
 	var error = request(url, headers, false, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		var error_msg := "Something went wrong when initiating the stable horde request"

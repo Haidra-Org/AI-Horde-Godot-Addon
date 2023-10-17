@@ -3,6 +3,7 @@ extends StableHordeHTTPRequest
 
 signal models_retrieved(models_list, model_reference)
 
+export(String) var aihorde_url: = "https://aihorde.net"
 var model_performances := []
 var model_names := []
 var models_retrieved = false
@@ -20,10 +21,11 @@ func get_models() -> void:
 		print_debug("Models currently working. Cannot do more than 1 request at a time with the same Stable Horde Models.")
 		return
 	state = States.WORKING
-	var error = request("https://aihorde.net/api/v2/status/models", [], false, HTTPClient.METHOD_GET)
+	var error = request(aihorde_url + "/api/v2/status/models", [], false, HTTPClient.METHOD_GET)
 	if error != OK:
 		var error_msg := "Something went wrong when initiating the stable horde request"
 		push_error(error_msg)
+		state = States.READY
 		emit_signal("request_failed",error_msg)
 
 
@@ -56,3 +58,6 @@ func _load_from_file() -> void:
 	if filevar:
 		model_performances = filevar
 	file.close()
+	
+func emit_models_retrieved() -> void:
+	emit_signal("models_retrieved", model_performances, model_reference.model_reference)
