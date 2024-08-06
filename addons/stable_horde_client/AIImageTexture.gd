@@ -2,7 +2,7 @@
 class_name AIImageTexture
 extends ImageTexture
 
-const FILENAME_TEMPLATE := "{timestamp}_{gen_seed}"
+const FILENAME_TEMPLATE := "{timestamp}_{gen_seed}{batch_id}"
 const DIRECTORY_TEMPLATE := "{sampler_name}_{steps}_{prompt}"
 
 # The prompt which generated this image
@@ -31,6 +31,8 @@ var attributes: Dictionary
 var timestamp: float
 var image_horde_id: String
 var control_type: String
+var request_id: String
+var gen_metadata: Array
 
 func _init(
 		_prompt: String, 
@@ -42,7 +44,10 @@ func _init(
 		_timestamp: float,
 		_control_type: String,
 		_image: Image,
-		_image_horde_id: String) -> void:
+		_image_horde_id: String,
+		_request_id: String,
+		_gen_metadata: Array
+	) -> void:
 	._init()
 	prompt = _prompt
 	attributes = _imgen_params.duplicate(true)
@@ -64,6 +69,10 @@ func _init(
 	image = _image
 	image_horde_id = _image_horde_id
 	timestamp = _timestamp
+	request_id = _request_id
+	attributes['request_id'] = _request_id
+	gen_metadata = _gen_metadata
+	attributes['gen_metadata'] = _gen_metadata
 	
 # This can be used to provide metadata for the source image in img2img requests
 func set_source_image_path(image_path: String) -> void:
@@ -74,7 +83,10 @@ func get_filename() -> String:
 	var fmt := {
 		"timestamp": timestamp,
 		"gen_seed": gen_seed,
+		"batch_id": '',
 	}
+	if _get_batch_id() != '':
+		 fmt["batch_id"] = "_" + _get_batch_id()
 	var filename = sanitize_filename(FILENAME_TEMPLATE.format(fmt)).substr(0,100)
 	return(filename)
 
@@ -146,7 +158,14 @@ static func sanitize_filename(filename: String) -> String:
 		'(',
 		')',
 		' ',
+		'\n',
 	]
 	for c in replace_chars:
 		filename = filename.replace(c,'_')
 	return(filename)
+
+func _get_batch_id() -> String:
+	for meta in gen_metadata:
+		if meta["type"] == "batch_index":
+			return meta["ref"]
+	return ""
