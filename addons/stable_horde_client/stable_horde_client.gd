@@ -16,7 +16,9 @@ enum SamplerMethods {
 	k_dpm_adaptive
 	k_dpmpp_2s_a
 	k_dpmpp_2m
+	k_dpmpp_sde
 	dpmsolver
+	lcm
 }
 
 enum ControlTypes {
@@ -30,6 +32,11 @@ enum ControlTypes {
 	scribble
 	fakescribbles
 	hough
+}
+
+enum Workflows {
+	auto_detect = 0
+	qr_code
 }
 
 enum OngoingRequestOperations {
@@ -55,7 +62,7 @@ export(int,64,1024,64) var height := 512
 # Generally there's usually no reason to go above 50 unless you know what you're doing.
 export(int,1,100) var steps := 30
 # Advanced: The sampler used to generate. Provides slight variations on the same prompt.
-export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "k_dpm_fast", "k_dpm_adaptive", "k_dpmpp_2s_a", "k_dpmpp_2m", "dpmsolver") var sampler_name := "k_euler_a"
+export(String, "k_lms", "k_heun", "k_euler", "k_euler_a", "k_dpm_2", "k_dpm_2_a", "k_dpm_fast", "k_dpm_adaptive", "k_dpmpp_2s_a", "k_dpmpp_2m", "k_dpmpp_sde", "dpmsolver", "lcm") var sampler_name := "k_euler_a"
 # How closely to follow the prompt given
 export(float,0,30,0.5) var cfg_scale := 7.5
 # The number of CLIP language processor layers to skip.
@@ -97,6 +104,13 @@ export(bool) var r2 := true
 export(bool) var shared := true
 export(String, "none", "canny", "hed", "depth", "normal", "openpose", "seg", "scribble", "fakescribbles", "hough") var control_type := "none"
 export(bool) var dry_run := false
+export(bool) var replacement_filter := true
+export(Array) var workers := []
+export(bool) var worker_blacklist := false
+export(bool) var allow_downgrade := false
+export(bool) var transparent := false
+export(String, "auto-detect", "qr_code") var workflow := "auto-detect"
+export(Array) var extra_texts = []
 
 var all_image_textures := []
 var latest_image_textures := []
@@ -131,6 +145,7 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"seed": gen_seed,
 		"post_processing": post_processing,
 		"clip_skip": clip_skip,
+		"transparent": transparent,
 	}
 	if control_type != 'none':
 		imgen_params["control_type"] = control_type
@@ -138,6 +153,10 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		imgen_params["loras"] = _get_loras_payload()
 	if tis.size() > 0:
 		imgen_params["tis"] = _get_tis_payload()
+	if workflow != 'auto-detect':
+		imgen_params["workflow"] = workflow
+	if extra_texts != null and extra_texts.size() > 0:
+		imgen_params["extra_texts"] = extra_texts
 	for param in replacement_params:
 		imgen_params[param] = replacement_params[param]
 	var submit_dict = {
@@ -150,9 +169,18 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"r2": r2,
 		"shared": shared,
 		"dry_run": dry_run,
-#		"workers": ["dc0704ab-5b42-4c65-8471-561be16ad696"], # debug
+		"workers": workers,
+		"worker_blacklist": worker_blacklist,
+		"allow_downgrade": allow_downgrade,
+		"replacement_filter": replacement_filter
+#		"workers": [
+#			"dc0704ab-5b42-4c65-8471-561be16ad696", #portal
+#		], # debug
 	}
-#	print_debug(submit_dict)
+	if false: # Debug
+		print_debug(submit_dict)
+		push_warning("Aborting due to debug")
+		return
 	if source_image:
 		submit_dict["source_image"] = get_img2img_b64(source_image)
 		submit_dict["params"]["denoising_strength"] = denoising_strength
@@ -165,6 +193,8 @@ func generate(replacement_prompt := '', replacement_params := {}) -> void:
 		"apikey: " + api_key,
 		"Client-Agent: " + client_agent,
 	]
+#	print_debug(body)
+#	print_debug(headers)
 	var error = request(aihorde_url + "/api/v2/generate/async", headers, false, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		var error_msg := "Something went wrong when initiating the stable horde request"
@@ -282,7 +312,10 @@ func prepare_aitexture(imgbuffer: PoolByteArray, img_dict: Dictionary, timestamp
 		timestamp,
 		control_type,
 		image,
-		img_dict["id"])
+		img_dict["id"],
+		async_request_id,
+		img_dict.get("gen_metadata", [])
+	)
 	texture.create_from_image(image)
 	latest_image_textures.append(texture)
 	# Avoid keeping all images in RAM. Until I find a reason for it.
