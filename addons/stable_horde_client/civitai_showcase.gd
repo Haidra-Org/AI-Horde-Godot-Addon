@@ -8,12 +8,12 @@ var model_reference := {}
 var texture: ImageTexture
 var model_name: String
 var used_image_index: int
-export(int) var showcase_index := 0
+@export var showcase_index := 0
 
 func _ready():
 	# warning-ignore:return_value_discarded
 	timeout = 2
-	connect("request_completed",self,"_on_request_completed")
+	connect("request_completed", Callable(self, "_on_request_completed"))
 
 func get_model_showcase(
 		_model_reference: Dictionary, 
@@ -37,7 +37,7 @@ func get_model_showcase(
 			return
 		showcase_url = model_reference["images"][used_image_index]
 		print_debug(showcase_url)
-	var error = request(showcase_url, [], false, HTTPClient.METHOD_GET)
+	var error = request(showcase_url, [], HTTPClient.METHOD_GET)
 	if error != OK:
 		var error_msg := "Something went wrong when initiating the request"
 		push_error(error_msg)
