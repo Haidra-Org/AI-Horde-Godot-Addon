@@ -1,64 +1,57 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=4 format=3 uid="uid://b578orwh45a7y"]
 
-[ext_resource path="res://icon.png" type="Texture" id=1]
-[ext_resource path="res://addons/stable_horde_client/stable_horde_client.gd" type="Script" id=2]
-[ext_resource path="res://Demo.gd" type="Script" id=3]
+[ext_resource type="Texture2D" uid="uid://bo6cnpvublqpe" path="res://icon.png" id="1"]
+[ext_resource type="Script" uid="uid://cgcattwpxioo5" path="res://addons/stable_horde_client/stable_horde_client.gd" id="2"]
+[ext_resource type="Script" uid="uid://bxaexrg3o26n3" path="res://Demo.gd" id="3"]
 
 [node name="VBoxContainer" type="VBoxContainer"]
-margin_right = 1024.0
-margin_bottom = 600.0
-script = ExtResource( 3 )
+offset_right = 1024.0
+offset_bottom = 600.0
+script = ExtResource("3")
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
-margin_right = 1024.0
-margin_bottom = 15.0
+layout_mode = 2
 bbcode_enabled = true
-bbcode_text = "Check out my [color=yellow][url=stable horde client]fully fledged client[/url][/color]."
 text = "Check out my fully fledged client."
-fit_content_height = true
 
 [node name="LineEdit" type="LineEdit" parent="."]
 unique_name_in_owner = true
-margin_top = 19.0
-margin_right = 1024.0
-margin_bottom = 43.0
+layout_mode = 2
 placeholder_text = "A horde of cute blue robots with gears on their head."
 
 [node name="Button" type="Button" parent="."]
 unique_name_in_owner = true
-margin_top = 47.0
-margin_right = 1024.0
-margin_bottom = 67.0
+layout_mode = 2
 text = "Generate"
 
 [node name="Status" type="Label" parent="."]
 unique_name_in_owner = true
-margin_top = 71.0
-margin_right = 1024.0
-margin_bottom = 85.0
+layout_mode = 2
 text = "Status"
-align = 1
+horizontal_alignment = 1
+autowrap_mode = 1
 
 [node name="StableHordeClient" type="HTTPRequest" parent="."]
 unique_name_in_owner = true
-script = ExtResource( 2 )
+script = ExtResource("2")
+width = 1024
+height = 1024
 steps = 20
+cfg_scale = 8.0
+models = ["AlbedoBase XL (SDXL)"]
 
 [node name="Grid" type="GridContainer" parent="."]
 unique_name_in_owner = true
-margin_top = 89.0
-margin_right = 1024.0
-margin_bottom = 600.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 7
 
 [node name="TextureRect" type="TextureRect" parent="Grid"]
-margin_right = 128.0
-margin_bottom = 128.0
-rect_min_size = Vector2( 128, 128 )
-texture = ExtResource( 1 )
-expand = true
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+texture = ExtResource("1")
+expand_mode = 1
 stretch_mode = 6
 
 [connection signal="meta_clicked" from="RichTextLabel" to="." method="_on_RichTextLabel_meta_clicked"]

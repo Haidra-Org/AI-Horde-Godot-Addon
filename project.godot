@@ -6,105 +6,18 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
-
-_global_script_classes=[ {
-"base": "ImageTexture",
-"class": "AIImageTexture",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/AIImageTexture.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "CivitAILoraReference",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/civitai_lora_reference.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "CivitAIModelFetch",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/civitai_lora_model_fetch.gd"
-}, {
-"base": "HTTPRequest",
-"class": "CivitAIShowcase",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/civitai_showcase.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "CivitAITIReference",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/civitai_ti_reference.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "CivitAITextualInversionModelFetch",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/civitai_ti_model_fetch.gd"
-}, {
-"base": "HTTPRequest",
-"class": "R2ImageRetriever",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/r2_image_retriever.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "StableHordeClient",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_client.gd"
-}, {
-"base": "HTTPRequest",
-"class": "StableHordeHTTPRequest",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_httpclient.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "StableHordeLogin",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_login.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "StableHordeModelReference",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_model_reference.gd"
-}, {
-"base": "HTTPRequest",
-"class": "StableHordeModelShowcase",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_model_showcase.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "StableHordeModels",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_models.gd"
-}, {
-"base": "StableHordeHTTPRequest",
-"class": "StableHordeRateGeneration",
-"language": "GDScript",
-"path": "res://addons/stable_horde_client/stable_horde_rate_generation.gd"
-} ]
-_global_script_class_icons={
-"AIImageTexture": "",
-"CivitAILoraReference": "",
-"CivitAIModelFetch": "",
-"CivitAIShowcase": "",
-"CivitAITIReference": "",
-"CivitAITextualInversionModelFetch": "",
-"R2ImageRetriever": "",
-"StableHordeClient": "",
-"StableHordeHTTPRequest": "",
-"StableHordeLogin": "",
-"StableHordeModelReference": "",
-"StableHordeModelShowcase": "",
-"StableHordeModels": "",
-"StableHordeRateGeneration": ""
-}
+config_version=5
 
 [application]
 
 config/name="Stable Horde Client AddOn Demo"
 run/main_scene="res://Demo.tscn"
+config/features=PackedStringArray("4.4")
 config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/stable_horde_client/plugin.cfg" )
+enabled=PackedStringArray("res://addons/stable_horde_client/plugin.cfg")
 
 [gui]
 
@@ -116,4 +29,4 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+environment/defaults/default_environment="res://default_env.tres"
